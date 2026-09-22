@@ -1,0 +1,492 @@
+[
+  {
+    "id": "F-001",
+    "category": "functional",
+    "description": "서버가 기동되고 /health 엔드포인트가 정상 응답한다",
+    "steps": [
+      "init.sh 를 실행한다",
+      "브라우저에서 http://localhost:3000/health 접속",
+      "응답 JSON 에 status: ok 가 포함되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-002",
+    "category": "functional",
+    "description": "루트(/) 접속 시 장비 목록 페이지가 EJS로 렌더링된다",
+    "steps": [
+      "http://localhost:3000/ 접속",
+      "장비 목록 페이지(HTML)가 표시되는지 확인",
+      "페이지에 장비 목록 영역이 존재하는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-003",
+    "category": "functional",
+    "description": "시드된 장비들이 목록에 모두 표시된다",
+    "steps": [
+      "루트 페이지 접속",
+      "시드 장비(노트북/모니터/주변기기)들이 목록에 나타나는지 확인",
+      "총 항목 수가 시드 개수와 일치하는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-004",
+    "category": "functional",
+    "description": "각 장비의 이름이 목록에 표시된다",
+    "steps": [
+      "루트 페이지 접속",
+      "각 행에 장비명이 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-005",
+    "category": "functional",
+    "description": "각 장비의 종류(type)가 목록에 표시된다",
+    "steps": [
+      "루트 페이지 접속",
+      "각 장비 행에 종류(노트북/모니터/주변기기)가 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-006",
+    "category": "functional",
+    "description": "각 장비의 상태(대여가능/대여중)가 표시된다",
+    "steps": [
+      "루트 페이지 접속",
+      "각 장비 행에 상태 라벨(대여가능/대여중)이 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-007",
+    "category": "functional",
+    "description": "대여가능 장비에는 대여 폼/버튼이 노출된다",
+    "steps": [
+      "루트 페이지 접속",
+      "상태가 대여가능인 장비 행에 대여 버튼 또는 폼이 있는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-008",
+    "category": "functional",
+    "description": "대여중 장비에는 반납 버튼이 노출된다",
+    "steps": [
+      "장비 하나를 대여 처리한다",
+      "해당 장비 행에 반납 버튼이 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-009",
+    "category": "functional",
+    "description": "대여 폼에 대여자명 입력 필드가 있다",
+    "steps": [
+      "대여가능 장비의 대여 폼을 연다",
+      "대여자명 입력 필드가 존재하는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-010",
+    "category": "functional",
+    "description": "대여 폼에 반납예정일 입력 필드가 있다",
+    "steps": [
+      "대여가능 장비의 대여 폼을 연다",
+      "반납예정일(date) 입력 필드가 존재하는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-011",
+    "category": "functional",
+    "description": "대여 제출 시 rentals 테이블에 대여 기록이 생성된다",
+    "steps": [
+      "대여자명/반납예정일 입력 후 대여 제출",
+      "목록에서 해당 장비가 대여중으로 바뀌는지 확인",
+      "(선택) DB 확인 시 rentals 에 returned_at IS NULL 레코드가 생김"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-012",
+    "category": "functional",
+    "description": "대여 제출 시 장비 상태가 대여중으로 변경된다",
+    "steps": [
+      "대여가능 장비를 대여 제출",
+      "목록 새로고침 후 상태가 대여중으로 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-013",
+    "category": "functional",
+    "description": "대여자명 미입력 시 대여가 거부되고 에러가 표시된다",
+    "steps": [
+      "대여자명을 비운 채 반납예정일만 입력하고 제출",
+      "대여가 생성되지 않고 검증 에러 메시지가 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-014",
+    "category": "functional",
+    "description": "반납예정일 미입력 시 대여가 거부되고 에러가 표시된다",
+    "steps": [
+      "반납예정일을 비운 채 대여자명만 입력하고 제출",
+      "대여가 생성되지 않고 검증 에러 메시지가 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-015",
+    "category": "functional",
+    "description": "이미 대여중인 장비는 다시 대여할 수 없다",
+    "steps": [
+      "장비를 대여 처리한다",
+      "같은 장비를 다시 대여 시도(직접 요청 등)",
+      "재대여가 거부되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-016",
+    "category": "functional",
+    "description": "반납 처리 시 장비 상태가 대여가능으로 변경된다",
+    "steps": [
+      "대여중 장비의 반납 버튼을 누른다",
+      "목록에서 상태가 대여가능으로 바뀌는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-017",
+    "category": "functional",
+    "description": "반납 처리 시 해당 대여 기록에 반납일시가 기록된다",
+    "steps": [
+      "대여중 장비를 반납한다",
+      "(선택) DB 에서 해당 rentals.returned_at 이 채워졌는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-018",
+    "category": "functional",
+    "description": "반납된 장비는 다시 대여할 수 있다",
+    "steps": [
+      "대여 -> 반납한 장비를 다시 대여 시도",
+      "정상적으로 대여되고 상태가 대여중이 되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-019",
+    "category": "functional",
+    "description": "반납예정일이 지난 대여 건을 연체로 판별한다",
+    "steps": [
+      "반납예정일을 과거 날짜로 대여한다(또는 시드로 준비)",
+      "목록에서 해당 건이 연체로 계산되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-020",
+    "category": "functional",
+    "description": "연체 건은 목록에서 연체 표시가 된다",
+    "steps": [
+      "연체 상태 장비가 있는 목록을 연다",
+      "연체 배지/라벨이 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-021",
+    "category": "functional",
+    "description": "반납예정일이 오늘인 건은 연체가 아니다",
+    "steps": [
+      "반납예정일을 오늘로 대여한다",
+      "해당 건이 연체로 표시되지 않는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-022",
+    "category": "functional",
+    "description": "대여중 장비에 현재 대여자명이 표시된다",
+    "steps": [
+      "장비를 대여자명 입력 후 대여",
+      "목록의 해당 행에 대여자명이 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-023",
+    "category": "functional",
+    "description": "대여중 장비에 반납예정일이 표시된다",
+    "steps": [
+      "장비를 반납예정일 입력 후 대여",
+      "목록의 해당 행에 반납예정일이 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-024",
+    "category": "functional",
+    "description": "잘못된 장비 id로 대여 요청 시 에러 처리된다",
+    "steps": [
+      "존재하지 않는 equipment_id로 대여 요청",
+      "4xx 에러 또는 안내 메시지로 처리되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-025",
+    "category": "functional",
+    "description": "잘못된 장비 id로 반납 요청 시 에러 처리된다",
+    "steps": [
+      "존재하지 않는 equipment_id로 반납 요청",
+      "4xx 에러 또는 안내 메시지로 처리되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-026",
+    "category": "functional",
+    "description": "대여가능 상태가 아닌 장비 반납 요청은 안전하게 처리된다",
+    "steps": [
+      "대여가능(미대여) 장비에 반납 요청",
+      "오류 없이 무시되거나 안내되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-027",
+    "category": "functional",
+    "description": "데이터가 SQLite 파일(data/app.db)에 영속된다",
+    "steps": [
+      "장비를 대여한다",
+      "data/app.db 파일이 존재하고 크기가 있는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F-028",
+    "category": "functional",
+    "description": "서버 재기동 후에도 대여 상태가 유지된다",
+    "steps": [
+      "장비를 대여한다",
+      "서버를 재기동한다",
+      "루트 페이지에서 대여중 상태가 그대로 유지되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-001",
+    "category": "ui",
+    "description": "페이지 상단에 앱 제목/헤더가 표시된다",
+    "steps": [
+      "루트 페이지 접속",
+      "상단에 앱 제목(예: 사내 장비 대여)이 보이는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-002",
+    "category": "ui",
+    "description": "장비 목록이 표/카드 형태로 정렬되어 보인다",
+    "steps": [
+      "루트 페이지 접속",
+      "목록이 표 또는 카드 레이아웃으로 정돈되어 있는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-003",
+    "category": "ui",
+    "description": "상태(대여가능/대여중)가 색상/배지로 시각적으로 구분된다",
+    "steps": [
+      "루트 페이지 접속",
+      "상태에 따라 배지 색상 등이 다르게 보이는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-004",
+    "category": "ui",
+    "description": "연체 항목이 시각적으로 강조된다",
+    "steps": [
+      "연체 상태 장비가 있는 목록을 연다",
+      "연체 항목이 빨간색 등으로 강조되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-005",
+    "category": "ui",
+    "description": "대여 폼이 인라인 또는 모달로 노출된다",
+    "steps": [
+      "대여가능 장비의 대여 버튼을 누른다",
+      "대여 입력 폼이 나타나는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-006",
+    "category": "ui",
+    "description": "대여 성공 후 목록 페이지로 리다이렉트된다",
+    "steps": [
+      "대여를 제출한다",
+      "제출 후 목록 페이지로 이동되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-007",
+    "category": "ui",
+    "description": "반납 성공 후 목록 페이지로 리다이렉트된다",
+    "steps": [
+      "반납을 제출한다",
+      "제출 후 목록 페이지로 이동되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-008",
+    "category": "ui",
+    "description": "장비가 없을 때 안내 메시지가 표시된다",
+    "steps": [
+      "장비가 하나도 없는 상태(빈 DB)로 루트 접속",
+      "빈 목록 안내 문구가 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-009",
+    "category": "ui",
+    "description": "날짜가 YYYY-MM-DD 형식으로 표시된다",
+    "steps": [
+      "대여중 장비의 반납예정일 표시를 확인",
+      "YYYY-MM-DD 형식으로 보이는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-010",
+    "category": "ui",
+    "description": "폼 검증 에러가 사용자에게 메시지로 표시된다",
+    "steps": [
+      "대여 폼을 비운 채 제출",
+      "화면에 검증 에러 메시지가 보이는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-011",
+    "category": "ui",
+    "description": "모바일 좁은 폭에서도 레이아웃이 깨지지 않는다",
+    "steps": [
+      "브라우저 폭을 375px 로 줄인다",
+      "목록/폼이 가로 스크롤 없이 읽히는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "U-012",
+    "category": "ui",
+    "description": "대여자명/반납예정일이 대여중 행에 함께 표시된다",
+    "steps": [
+      "장비를 대여한다",
+      "해당 행에 대여자명과 반납예정일이 함께 보이는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-001",
+    "category": "regression",
+    "description": "대여 -> 반납 -> 재대여 전체 흐름이 정상 동작한다",
+    "steps": [
+      "장비를 대여한다",
+      "반납한다",
+      "다시 대여한다",
+      "각 단계에서 상태가 올바르게 바뀌는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-002",
+    "category": "regression",
+    "description": "여러 장비를 동시에 대여해도 상태가 서로 독립적이다",
+    "steps": [
+      "장비 A, B 를 각각 대여한다",
+      "A 만 반납한다",
+      "A는 대여가능, B는 대여중으로 각각 유지되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-003",
+    "category": "regression",
+    "description": "연체 장비를 반납하면 연체 표시가 사라진다",
+    "steps": [
+      "연체 상태 장비를 반납한다",
+      "목록에서 연체 표시가 없어지고 대여가능으로 바뀌는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-004",
+    "category": "regression",
+    "description": "init-db 시드를 다시 실행해도 장비가 중복 생성되지 않는다",
+    "steps": [
+      "npm run init-db 를 두 번 실행한다",
+      "장비 총 개수가 증가하지 않는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-005",
+    "category": "regression",
+    "description": "동일 장비 연속 대여 방지가 반복 시도에도 유지된다",
+    "steps": [
+      "대여중 장비에 대여를 여러 번 시도한다",
+      "매번 거부되고 상태가 하나의 대여로만 유지되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-006",
+    "category": "regression",
+    "description": "서버 재기동 후에도 대여중/연체 표시가 재계산되어 유지된다",
+    "steps": [
+      "과거 반납예정일로 대여한다",
+      "서버를 재기동한다",
+      "해당 건이 여전히 연체로 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-007",
+    "category": "regression",
+    "description": "반납예정일 경계값(오늘/어제)이 올바르게 연체 판별된다",
+    "steps": [
+      "반납예정일이 오늘인 대여와 어제인 대여를 준비한다",
+      "오늘 건은 정상, 어제 건은 연체로 표시되는지 확인"
+    ],
+    "passes": false
+  },
+  {
+    "id": "R-008",
+    "category": "regression",
+    "description": "특수문자/공백 포함 대여자명도 안전하게 저장/표시된다",
+    "steps": [
+      "대여자명에 <script> 등 특수문자를 넣고 대여한다",
+      "이스케이프되어 안전하게 표시되고 저장되는지 확인"
+    ],
+    "passes": false
+  }
+]

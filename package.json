@@ -1,0 +1,19 @@
+{
+  "name": "nkia-oa-equipment-rental",
+  "version": "0.1.0",
+  "description": "사내 장비 대여 관리 미니 웹앱 (환경 스캐폴드)",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "init-db": "node scripts/init-db.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0"
+  }
+}
