@@ -1,5 +1,5 @@
 // Express 서버 부트스트랩 (환경 스캐폴드)
-// EJS 뷰 엔진 설정, 헬스체크, 장비 목록 페이지(/)를 제공한다.
+// EJS 뷰 엔진 설정, 헬스체크, 장비 목록 페이지(/), 대여 제출(POST /equipment/:id/rent)을 제공한다.
 const path = require('path');
 const express = require('express');
 const { getDb, DB_PATH } = require('./db');
@@ -38,6 +38,26 @@ app.get('/', (req, res) => {
     .all()
     .map((item) => ({ ...item, statusLabel: STATUS_LABELS[item.status] }));
   res.render('index', { title: 'NKIA 장비 대여', equipment });
+});
+
+// 대여 제출 — 미반납(returned_at NULL) rentals 행을 만들고 장비를 대여중으로 바꾼 뒤 목록으로 돌아간다 (PRG).
+// 두 쓰기는 한 트랜잭션으로 묶어 "기록은 있는데 상태는 대여가능" 같은 어긋난 상태가 남지 않게 한다.
+// 입력 검증(F-013/F-014)과 중복 대여 거부(F-015)는 별도 기능에서 다룬다.
+app.post('/equipment/:id/rent', (req, res) => {
+  const db = conn();
+  const equipment = db.prepare('SELECT id FROM equipment WHERE id = ?').get(req.params.id);
+  if (!equipment) return res.status(404).send('장비를 찾을 수 없습니다.');
+
+  const { renter_name: renterName, due_date: dueDate } = req.body;
+  db.transaction(() => {
+    db.prepare('INSERT INTO rentals (equipment_id, renter_name, due_date) VALUES (?, ?, ?)').run(
+      equipment.id,
+      renterName,
+      dueDate
+    );
+    db.prepare("UPDATE equipment SET status = 'rented' WHERE id = ?").run(equipment.id);
+  })();
+  res.redirect(303, '/');
 });
 
 if (require.main === module) {
