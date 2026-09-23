@@ -14,6 +14,41 @@
 #   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
+[2026-09-23 14:40] 053a5d8 | F-007 DONE
+  (1) 했다: views/index.ejs 에 thead "작업" th 와 행마다 <td class="equipment-actions"> 를 상태 칼럼 뒤에 추가했다.
+      status === 'available' 인 행에만 <details class="rent-toggle"><summary class="btn btn--primary">대여</summary>
+      <form class="rent-form" method="post" action="/equipment/<id>/rent"><button type="submit" class="btn btn--primary">대여</button>
+      </form></details> 를 렌더링한다. 서버 코드는 바꾸지 않았다(status 는 이미 넘어옴).
+      설계 판단: UI_GUIDE §4 "모달 vs 인라인 펼침 중 하나로 통일" 을 여기서 인라인 펼침(<details>)으로 확정했다 —
+      JS 없이 열리고 제출되며(§2 SSR 우선), 모달 JS/포커스 관리가 필요 없다. 폼 action 은 REST 형태
+      /equipment/:id/rent 로 정했다. 입력 필드(대여자명·반납예정일)는 F-009/F-010, POST 라우트는 F-011 몫이라 넣지 않았다.
+      대여자/반납예정일 칼럼(F-022/F-023)도 없으므로 작업 칼럼은 지금 4번째다 — 그 칼럼들은 상태와 작업 사이에 끼워 넣을 것.
+      검증: e2e/F-007.spec.js 에 steps 2개를 옮겼다 — (a) / 접속, #equipment-list 표시, 행 수 == DB COUNT(*)(실제 쿼리),
+      "작업" 헤더. (b) 대여가능 배지가 있는 모든 행에 대해: summary "대여" 1개 보임, form.rent-form 이 method=post,
+      action=/equipment/<그 행 id>/rent, 펼치기 전 숨김 -> summary 클릭 후 보이고 제출 버튼 "대여". 대여가능이 아닌 행엔
+      .rent-toggle/form.rent-form 0개. 전체 npx playwright test 8/8 통과(smoke, F-002~F-007).
+      회귀 확인: 조건을 sed 로 !== 'available' 로 뒤집고 재기동 -> F-007 실패 확인 -> sed 로 원복 -> 재기동 -> 8/8.
+      수동 확인: DB 에서 id=6 을 rented 로 바꾸고 curl 로 해당 행에 rent-toggle 이 없고 나머지 5행에만 있음을 확인 ->
+      available 로 복구(status<>'available' 0건 쿼리로 확인).
+      스크린샷 확인함 (desktop/mobile): test-results/ui-desktop.png(1280), ui-mobile.png(375), 그리고 첫 행을 펼친
+      ui-mobile-open.png 를 직접 열어봤다. 4칼럼 6행, 각 행 "▶ 대여" 토글, 펼치면 행 안에 제출 버튼이 보임. 375px 펼친 상태에서도
+      scrollWidth=375 로 가로 넘침 없음. 발견한 문제: (a) app.css 가 없어 summary 가 삼각형 마커 붙은 평문, 버튼은 브라우저 기본
+      스타일 — U-002/U-005 에서 .btn 과 details 마커 제거 스타일링 필요. (b) 한글 tofu(□)는 기존과 같은 원인(WSL 한글 폰트 미설치).
+      UI_GUIDE §6 에 F-007 선택자를 추가했다.
+  (2) 주의: 지금 제출 버튼을 누르면 POST 라우트가 없어 Express 기본 404("Cannot POST")가 난다 — F-011 전까지의 과도 상태다.
+      F-007 테스트는 기대 행을 DB 가 아니라 렌더링된 배지(.badge--available) 기준으로 잡는다. F-006 (b) 가 병렬 실행 중
+      공유 DB 의 status 를 잠깐 바꾸기 때문에 DB 기준으로 비교하면 경합으로 불안정해진다. 같은 이유로 이번에는 DB 를 바꾸는
+      "대여중 행엔 대여 버튼 없음" 테스트를 추가하지 않고 수동 확인만 했다 — F-008 에서 대여중 행을 만들 때 격리 방식
+      (파일 serial 묶음 또는 workers 조정, 혹은 전용 장비) 을 정하고 이 경우도 함께 검증할 것.
+      summary 와 제출 버튼 텍스트가 둘 다 "대여"다. 테스트/선택자는 details.rent-toggle > summary 와 form.rent-form
+      button[type=submit] 으로 구분할 것(getByRole('button', {name:'대여'}) 는 여러 개가 잡힌다).
+      test-results/.last-run.json 이 git 에 추적되고 있어 테스트 실행마다 dirty 해진다(이번엔 checkout 으로 되돌려 커밋 제외).
+      data/server.pid 처럼 추적 해제(git rm --cached) 를 사람과 상의해 별도 chore 커밋으로 처리하길 권한다.
+  (3) 다음: F-008(대여중 행에 반납 버튼). 작업 칼럼의 else 분기에 <form class="return-form" method="post"
+      action="/equipment/<id>/return"><button class="btn btn--secondary">반납</button></form> 를 두면 F-007 과 대칭이다.
+      steps 1 이 "장비 하나를 대여 처리한다" 인데 대여 라우트(F-011) 전이라 F-006 처럼 DB 를 직접 바꾸되, 위 (2) 의 경합
+      문제를 먼저 해결해야 한다. 이어 F-009/F-010 은 form.rent-form 안에 label for 연결된 input 두 개(type=date 포함)를 추가하면 된다.
+
 [2026-09-23 14:10] 2952d84 | F-006 DONE
   (1) 했다: src/server.js 에 STATUS_LABELS = { available: '대여가능', rented: '대여중' } 를 두고 GET / 결과에
       statusLabel 을 붙여 넘긴다. views/index.ejs 에 thead "상태" th 와 행마다
