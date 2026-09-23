@@ -37,6 +37,11 @@
                   <button type="submit" class="btn btn--primary">대여</button>
                 </form>
               </details>
+              <% } else if (item.status === 'rented') { %>
+              <%# 반납은 입력이 필요 없으므로 펼침 없이 바로 제출하는 폼 하나로 둔다. %>
+              <form class="return-form" method="post" action="/equipment/<%= item.id %>/return">
+                <button type="submit" class="btn btn--secondary">반납</button>
+              </form>
               <% } %>
             </td>
           </tr>
