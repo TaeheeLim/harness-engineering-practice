@@ -14,6 +14,29 @@
 #   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
+[2026-09-23 14:35] e5f22c2 | F-012 DONE
+  (1) 했다: 상태 변경 동작은 F-011 의 POST /equipment/:id/rent 트랜잭션(UPDATE equipment SET status='rented')에 이미
+      있어서 서버/뷰 코드는 바꾸지 않고 검증 세션으로 진행했다. e2e/F-012.spec.js 를 추가했다 — DB 에서 대여가능 장비
+      하나를 골라 step 1 행의 summary 클릭 -> 대여자명/반납예정일(2099-12-31) 입력 -> 대여 버튼 클릭 -> / 로 돌아옴,
+      step 2 page.reload() 로 새로고침(응답 요청 메서드가 GET 인지 확인해 303 PRG 덕에 재제출이 아님을 보장) 후 같은 행의
+      상태 셀 텍스트가 '대여중', .badge--rented 있음, .badge--available 없음, 대여 폼 사라지고 반납 버튼 보임, 행 수 =
+      DB 장비 수. 추가로 DB 쿼리로 equipment.status='rented', 다른 장비 상태는 테스트 전과 동일, 테스트 동안 생긴
+      rentals 는 정확히 1건(새로고침 재제출 없음)을 확인했다. finally 에서 새 rentals 삭제 + status 원복 후 원복을 쿼리로 확인.
+      설계 판단: F-011 테스트는 "리다이렉트 직후 화면" 을 봤으므로, F-012 는 steps 대로 새로고침 후 화면을 봐서 상태가
+      화면 일시 상태가 아니라 DB 에 저장된 값에서 렌더링된다는 점을 따로 보장하게 했다.
+      검증: 전체 npx playwright test 13/13 통과(1 worker). 회귀 확인: UPDATE 를 sed 로 SET status = status(no-op)로 바꾸고
+      재기동 -> F-012 실패(Expected "대여중" / Received "대여가능") -> 스크래치 백업본으로 원복 -> 재기동 -> 13/13.
+      실행 후 DB 는 미반납 0건, 장비 6개 모두 available(시드 상태).
+      스크린샷: 뷰/CSS 변경이 없어 UI_GUIDE §7 셀프 리뷰는 생략. 선택자도 기존 F-007~F-011 것만 써서 §6 추가 없음.
+  (2) 주의: F-011 (2) 의 서버 검증 부재 문제는 그대로다 — 빈 renter_name 저장, 필드 누락 시 NOT NULL 로 500, 이미 대여중
+      장비에 재POST 하면 rentals 가 하나 더 생긴다. 반납 라우트(POST /equipment/:id/return)는 여전히 없어 404.
+      F-012 테스트도 공유 DB 를 쓰므로 finally 정리를 유지할 것. 뮤테이션 확인 중 test-results/.last-run.json 이 잠깐
+      dirty 됐다가 마지막 전체 실행(통과)으로 원래 내용으로 돌아왔다. 추적 해제는 여전히 사람과 상의 필요.
+  (3) 다음: F-013(대여자명 미입력 시 거부 + 에러 표시). 브라우저 required 를 우회해야 하므로 테스트에서는 input 의
+      required 를 제거하거나 page.request.post 로 직접 요청해 서버 검증을 확인해야 한다. 서버는 trim 후 빈 값이면 INSERT 하지
+      않고 400 과 함께 목록을 재렌더링해 <p class="field-error" role="alert"> 로 UI_GUIDE §4 메시지를 보여주고 입력값을
+      유지하는 방식이 F-014 에도 그대로 재사용하기 좋다. 화면이 바뀌므로 UI_GUIDE 읽기와 §7 스크린샷이 필요하다.
+
 [2026-09-23 14:10] d707845 | F-011 DONE
   (1) 했다: src/server.js 에 POST /equipment/:id/rent 라우트를 추가했다. 장비를 id 로 조회해 없으면 404, 있으면
       db.transaction 안에서 rentals (equipment_id, renter_name, due_date) INSERT(returned_at 은 기본 NULL, rented_at 은
