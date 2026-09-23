@@ -14,6 +14,38 @@
 #   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
+[2026-09-23 13:45] 9bce43a | F-010 DONE
+  (1) 했다: views/index.ejs 의 form.rent-form 안, 대여자명 입력 뒤·제출 버튼 앞에 <label for="due-<id>">반납예정일</label>
+      <input type="date" id="due-<id>" name="due_date" required> 를 추가했다. 서버 코드는 바꾸지 않았다.
+      설계 판단: F-009 와 대칭으로 id 에 장비 id 를 붙여 행마다 label 연결이 유일하게 했다. name=due_date 는 rentals.due_date
+      칼럼과 같게 맞춰 F-011 라우트에서 req.body.due_date 로 바로 받도록 했다. type=date 는 UI_GUIDE §4 강제 사항이며,
+      브라우저는 value 를 항상 YYYY-MM-DD 로 넘기므로 U-009 날짜 형식과도 맞는다. required 는 1차 방어일 뿐이고 서버 검증은
+      F-014 몫이다. placeholder 는 넣지 않았다(UI_GUIDE §4).
+      검증: e2e/F-010.spec.js — 렌더링된 .badge--available 행마다 step 1 "대여 폼을 연다"(펼치기 전 숨김 -> summary 클릭 ->
+      보임), step 2 "반납예정일(date) 입력 필드 존재" 를 input[name=due_date] 1개, visible, editable, type 속성=date 이고
+      DOM 프로퍼티 el.type 도 date(브라우저가 실제 date 입력으로 인식), required, id=due-<행 id>, label[for] 텍스트 "반납예정일",
+      getByLabel('반납예정일') 1개, fill('2099-12-31') 후 값 유지, 'not-a-date' 대입 시 값이 비워짐(날짜 외 값 거부),
+      DOM 순서 대여자명 입력 < 반납예정일 입력 < 제출 버튼, 행별 id 가 모두 다름 으로 확인했다. steps 에 DB 확인 단계는 없다.
+      전체 npx playwright test 11/11 통과(1 worker). 회귀 확인: type="date" 를 sed 로 type="text" 로 바꾸고 재기동 -> F-010 실패
+      (Expected "date" / Received "text") -> 스크래치 백업본으로 원복 -> 재기동 -> 11/11.
+      스크린샷 확인함 (desktop/mobile): test-results/ui-desktop.png(1280), ui-mobile.png(375), 첫 행을 펼친 ui-1280-open.png,
+      ui-375-open.png 를 직접 열어봤다. 펼친 폼에 "대여자명" 라벨+입력 -> "반납예정일" 라벨+날짜 선택기(mm/dd/yyyy, 달력 아이콘)
+      -> 제출 버튼 순서로 행 안에 보인다. 1280/375 모두 scrollWidth 가 뷰포트 폭과 같아 가로 넘침 없음.
+      발견한 문제: 375px 펼친 상태에서 작업 칼럼이 더 넓어져 종류/상태 칼럼이 한 글자씩 세로로 접히고 "반납예정일" 라벨도
+      두 줄로 끊긴다(F-009 때보다 악화). app.css 가 없어 입력/버튼이 브라우저 기본 스타일(U-005 몫), 한글 tofu 는 WSL 폰트
+      미설치 — 기존과 같음. UI_GUIDE §6 에 F-010 선택자를 추가했다.
+  (2) 주의: 날짜 입력의 화면 표시(mm/dd/yyyy)는 브라우저 로케일에 따른 것이고 제출 값은 항상 YYYY-MM-DD 다 — 테스트는
+      표시 문자열이 아니라 value 로 검증할 것. 제출하면 POST /equipment/:id/rent 라우트가 없어 여전히 404 다(F-011 전 과도 상태).
+      getByLabel('반납예정일') 은 페이지 전체에서 대여가능 행 수만큼 잡히므로 행/폼으로 범위를 좁혀야 한다.
+      375px 칼럼 찌그러짐은 이번 기능 범위 밖이라 손대지 않았다 — U-005(입력 폭 100%/세로 배치)나 U-011(640px 이하 카드형)에서
+      해결해야 한다. test-results/.last-run.json 은 여전히 git 추적 중(이번엔 최종 통과 실행 후 내용이 같아 dirty 되지 않음).
+      추적 해제는 사람과 상의 필요.
+  (3) 다음: F-011(대여 제출 시 rentals 기록 생성). 이제 폼이 renter_name/due_date 를 모두 보내므로 src 에 POST
+      /equipment/:id/rent 라우트를 추가해 better-sqlite3 동기 트랜잭션으로 rentals INSERT(returned_at NULL) 후 / 로 redirect
+      하면 된다. F-012(status=rented 변경)도 같은 트랜잭션에서 처리될 가능성이 높지만, 한 세션 한 기능 원칙대로 F-011 테스트는
+      rentals 레코드 + 목록의 대여중 표시만 검증하고 F-012 는 별도 세션에서 검증할 것. 테스트는 finally 에서 rental 삭제와
+      status 원복을 쿼리로 확인해야 다른 테스트(F-003/F-006 등)와 충돌하지 않는다.
+
 [2026-09-23 13:25] fc1a65e | F-009 DONE
   (1) 했다: views/index.ejs 의 form.rent-form 안, 제출 버튼 앞에 <label for="renter-<id>">대여자명</label>
       <input type="text" id="renter-<id>" name="renter_name" required> 를 추가했다. 서버 코드는 바꾸지 않았다.
