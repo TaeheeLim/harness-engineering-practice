@@ -14,6 +14,28 @@
 #   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
+[2026-09-23 13:20] 089181a | F-004 DONE
+  (1) 했다: 코드 변경 없이 검증만 추가했다. F-003 에서 views/index.ejs 가 이미 장비마다
+      td.equipment-name 에 <%= item.name %> 를 출력하고 thead 에 "장비명" th 를 두고 있었기 때문이다.
+      e2e/F-004.spec.js 는 steps 2개를 그대로 옮겼다 — (a) / 접속 후 #equipment-list 표시,
+      (b) "장비명" 헤더가 보이고, 행 수 == DB 장비 수, 모든 행이 비어있지 않은 td.equipment-name 을
+      정확히 1개 가지며, data/app.db 를 better-sqlite3 readonly 로 실제 쿼리한 장비 id 별 name 이
+      해당 행 셀 텍스트와 정확히 일치(toHaveText 전체 일치)하는지 확인한다.
+      설계 판단: F-003 테스트는 행에 이름이 "포함"되는지(toContainText)만 봤으므로, F-004 는 "장비명
+      칼럼"에 "정확히" 표시되는지로 기준을 좁혔다. 시드 이름에 " 문자(MacBook Pro 14" 등)가 있어
+      이스케이프가 깨지면 불일치로 잡힌다.
+      검증: 전체 npx playwright test 4/4 통과(smoke, F-002, F-003, F-004). 테스트가 실제로 회귀를
+      잡는지 보려고 템플릿의 장비명을 slice(0,3) 로 일시 변경 후 서버 재기동 -> F-004 실패 확인 ->
+      원복 후 재기동 -> 4/4 통과를 확인했다(원복은 커밋 전 git status 로 확인, 템플릿 diff 없음).
+  (2) 주의: F-004 테스트는 td.equipment-name 셀 텍스트가 name "만" 담고 있다고 가정한다. 이 셀에
+      배지/아이콘/부가 텍스트를 넣으면 깨진다 — 부가 정보는 별도 td 로 추가할 것.
+      서버는 여전히 핫리로드가 없다. 템플릿 수정 후 ./init.sh 재실행 필수.
+  (3) 다음: F-005(종류 칼럼). 쿼리에 type 이 이미 있으므로 thead 에 "종류" th, 행에
+      <td class="equipment-type"><%= item.type %></td> 를 추가하고, 테스트는 행마다 셀 텍스트가
+      DB type 과 일치하며 노트북/모니터/주변기기 중 하나인지 확인하면 된다. 그 다음 F-006(상태 라벨,
+      status 'available'->대여가능, 'rented'->대여중 매핑)은 DB 원문 값이 아닌 한글 라벨을 표시해야
+      하므로 매핑 위치(서버 vs 템플릿)를 정해야 한다.
+
 [2026-09-23 13:03] 55a8e65 | F-003 DONE
   (1) 했다: src/server.js 의 GET / 에서 SELECT id, name, type, status FROM equipment ORDER BY id 를
       동기 .all() 로 조회해 index 템플릿에 equipment 로 넘긴다. getDb() 는 호출마다 새 연결을 여는
