@@ -19,6 +19,7 @@
             <th scope="col">장비명</th>
             <th scope="col">종류</th>
             <th scope="col">상태</th>
+            <th scope="col">작업</th>
           </tr>
         </thead>
         <tbody>
@@ -27,6 +28,17 @@
             <td class="equipment-name"><%= item.name %></td>
             <td class="equipment-type"><%= item.type %></td>
             <td class="equipment-status"><span class="badge badge--<%= item.status %>"><%= item.statusLabel %></span></td>
+            <td class="equipment-actions">
+              <% if (item.status === 'available') { %>
+              <%# 대여 폼은 행 안 인라인 펼침(<details>)으로 통일한다. JS 없이도 열리고 제출된다. %>
+              <details class="rent-toggle">
+                <summary class="btn btn--primary">대여</summary>
+                <form class="rent-form" method="post" action="/equipment/<%= item.id %>/rent">
+                  <button type="submit" class="btn btn--primary">대여</button>
+                </form>
+              </details>
+              <% } %>
+            </td>
           </tr>
           <% }); %>
         </tbody>
