@@ -10,7 +10,7 @@
     <h1>사내 장비 대여 관리</h1>
   </header>
   <main>
-    <%# 장비 목록 영역. 행마다 한 장비. 상태 칼럼은 F-006 에서 td 를 추가해 확장한다. %>
+    <%# 장비 목록 영역. 행마다 한 장비. 상태는 서버가 붙인 statusLabel 을 배지로 표시한다. %>
     <section id="equipment-list" aria-labelledby="equipment-list-title">
       <h2 id="equipment-list-title">장비 목록</h2>
       <table>
@@ -18,6 +18,7 @@
           <tr>
             <th scope="col">장비명</th>
             <th scope="col">종류</th>
+            <th scope="col">상태</th>
           </tr>
         </thead>
         <tbody>
@@ -25,6 +26,7 @@
           <tr class="equipment-row" data-equipment-id="<%= item.id %>">
             <td class="equipment-name"><%= item.name %></td>
             <td class="equipment-type"><%= item.type %></td>
+            <td class="equipment-status"><span class="badge badge--<%= item.status %>"><%= item.statusLabel %></span></td>
           </tr>
           <% }); %>
         </tbody>

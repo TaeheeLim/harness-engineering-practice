@@ -14,6 +14,9 @@ function conn() {
   return db;
 }
 
+// equipment.status(DB 원문) -> 화면 라벨. 배지 클래스는 badge--<status> 로 원문을 그대로 쓴다.
+const STATUS_LABELS = { available: '대여가능', rented: '대여중' };
+
 // 미들웨어
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -32,7 +35,8 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   const equipment = conn()
     .prepare('SELECT id, name, type, status FROM equipment ORDER BY id')
-    .all();
+    .all()
+    .map((item) => ({ ...item, statusLabel: STATUS_LABELS[item.status] }));
   res.render('index', { title: 'NKIA 장비 대여', equipment });
 });
 
