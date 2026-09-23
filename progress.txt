@@ -14,6 +14,28 @@
 #   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
+[2026-09-23 12:57] 2fb3400 | F-002 DONE
+  (1) 했다: views/index.ejs 를 새로 만들고 src/server.js 의 GET / 를 인라인 플레이스홀더 HTML 에서
+      res.render('index', { title }) 로 바꿨다. 템플릿에는 h1("사내 장비 대여 관리")과 장비 목록 영역
+      <section id="equipment-list" aria-labelledby=...>(접근성 region 이름 "장비 목록")만 둔다.
+      설계 판단: 한 세션 한 기능 원칙에 따라 이번에는 DB 조회와 행 렌더링을 하지 않았다. 목록 영역은
+      빈 section 이며, 테이블/행 구조는 F-003(시드 전체 표시)에서 정하는 것이 맞다고 봤다.
+      검증: e2e/F-002.spec.js 에 steps 3개를 그대로 옮겼다 — (a) / 접속 200, (b) content-type text/html
+      + title/h1 텍스트 + 스캐폴드 문구 부재(EJS 결과임을 확인), (c) #equipment-list 가 보이고
+      role=region name="장비 목록" 으로 잡히는지. 전체 npx playwright test 2/2 통과(smoke 포함).
+      DB 확인 단계는 이번 steps 에 없어 쿼리하지 않았다.
+  (2) 주의: 서버는 핫리로드가 없다. 코드 수정 후 e2e 전에 ./init.sh 를 다시 돌려야 새 코드가 반영된다.
+      data/server.pid 가 .gitignore 에 있음에도 git 에 추적되고 있어 init.sh 실행마다 작업 트리가
+      dirty 해졌다(F-002 커밋에도 pid 변경이 섞여 들어감). 별도 커밋 a8a4d80 에서 git rm --cached 로
+      추적 해제했으므로 이제는 init.sh 후에도 트리가 깨끗해야 한다.
+      F-003 테스트에서 행을 셀 때 #equipment-list 내부를 기준으로 잡으면 이번 테스트와 호환된다.
+      id/aria 이름을 바꾸면 F-002 테스트가 깨지니 유지할 것.
+  (3) 다음: F-003(시드 장비 6개 전체 표시). GET / 에서 getDb() 로 equipment 를 동기 조회(async 금지)해
+      템플릿에 넘기고 #equipment-list 안에 행을 렌더링한다. 시드 개수(6, scripts/init-db.js 의
+      SEED_EQUIPMENT)와 행 수 일치를 테스트하되, 이후 대여 테스트가 DB 를 바꿀 수 있으니 기대값은
+      DB COUNT(*) 쿼리로 구하는 편이 안전하다. 이어서 F-004~F-006 은 같은 행에 이름/종류/상태 칼럼을
+      더하는 작업이라 F-003 의 행 구조를 확장 가능하게 잡는 것이 좋다.
+
 [2026-09-23 11:05] F-001 DONE - 서버 기동 및 /health 헬스체크 정상 응답 확인, feature_list.json passes:true 처리
 
 (1) 무엇을 어떤 방식으로 구현했는지:
