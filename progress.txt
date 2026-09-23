@@ -14,6 +14,37 @@
 #   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
+[2026-09-23 15:10] ea25ae8 | F-008 DONE
+  (1) 했다: views/index.ejs 작업 칼럼에 `else if (item.status === 'rented')` 분기를 추가해
+      <form class="return-form" method="post" action="/equipment/<id>/return"><button type="submit"
+      class="btn btn--secondary">반납</button></form> 를 렌더링한다. 서버 코드는 바꾸지 않았다.
+      설계 판단: 반납은 입력값이 없으므로 대여처럼 <details> 로 감싸지 않고 버튼이 바로 보이는 제출 폼으로 했다
+      (UI_GUIDE §4 보조 버튼 = 반납). 조건을 else 가 아니라 명시적 'rented' 로 둔 것은 이후 overdue 가 status 가 아닌
+      서버 판정값으로 들어올 때 의도치 않게 반납 버튼이 빠지거나 붙는 일을 막기 위해서다.
+      경합 해결(F-007 세션 (2)의 숙제): playwright.config.js 에 workers: 1 을 넣어 전체를 직렬로 돌린다.
+      파일별 serial 묶음은 파일 간 경합(F-006(a) 의 DB 스냅샷 vs F-008 의 상태 변경)을 못 막고, 전용 장비 추가는
+      행 수를 DB COUNT 와 비교하는 F-003/F-004/F-007 과 경합한다. 전체 스위트가 약 2초라 비용이 없다.
+      검증: e2e/F-008.spec.js — step 1 "대여 처리" 는 대여 라우트(F-011) 전이라 트랜잭션으로 rentals 에 미반납 행
+      (renter 'F-008 테스트', due 2099-12-31)을 넣고 equipment.status='rented' 로 바꾼 뒤, DB 를 실제 쿼리해 status=rented,
+      미반납 건 1개를 확인. step 2 는 해당 행의 .badge--rented "대여중", form.return-form method=post,
+      action=/equipment/<id>/return, 버튼 visible/"반납"/.btn--secondary, 그 행엔 .rent-toggle/form.rent-form 0개,
+      대여중이 아닌 행엔 form.return-form/"반납" 버튼 0개. finally 에서 rental 삭제+status 원복하고 원복도 쿼리로 확인.
+      전체 npx playwright test 9/9 통과(1 worker). 회귀 확인: 조건을 'XXrented' 로 바꾸고 재기동 -> F-008 실패 -> 원복 -> 9/9.
+      스크린샷 확인함 (desktop/mobile): id=3 을 rented 로 바꾼 상태로 test-results/ui-desktop.png(1280), ui-mobile.png(375)
+      를 직접 열어봤다. Dell 행에만 "반납" 버튼, 나머지 5행은 "▶ 대여" 토글. 375px scrollWidth=375 로 가로 넘침 없음.
+      촬영 후 id=3 을 available 로 복구하고 status<>'available' 0건, rentals 0건을 쿼리로 확인.
+      발견한 문제: 기존과 같음 — app.css 가 없어 버튼이 브라우저 기본 스타일(U-002/U-005 몫), 한글 tofu 는 WSL 폰트 미설치.
+      UI_GUIDE §6 에 F-008 선택자를 추가했다.
+  (2) 주의: 반납 버튼을 누르면 POST /equipment/:id/return 라우트가 없어 404 다 — F-012 전까지의 과도 상태.
+      workers: 1 을 되돌리면 F-006/F-008 이 다른 파일과 경합해 간헐 실패한다. 병렬이 필요해지면 테스트별 DB 파일
+      (DB_PATH 환경변수 + 워커별 서버) 로 격리해야 한다.
+      F-008 테스트가 만든 rentals 행은 finally 에서 지우지만, 테스트 프로세스가 강제 종료되면 남을 수 있다 — 이상하면 ./init.sh
+      가 아니라(시드는 멱등이라 rentals 를 안 지움) rentals/status 를 직접 확인할 것.
+      test-results/.last-run.json 이 여전히 git 추적 중이다(이번엔 내용이 안 바뀌어 dirty 되지 않았음). 추적 해제는 사람과 상의 필요.
+  (3) 다음: F-009(대여 폼에 대여자명 입력). form.rent-form 안 제출 버튼 앞에 <label for="renter-<id>">대여자명</label>
+      <input id="renter-<id>" name="renter_name" required> 를 넣으면 된다(id 는 행마다 유일해야 label 연결이 맞음).
+      이어 F-010 은 같은 방식으로 type=date 의 due_date. 둘 다 끝나야 F-011(대여 POST 라우트) 가 입력값을 받을 수 있다.
+
 [2026-09-23 14:40] 053a5d8 | F-007 DONE
   (1) 했다: views/index.ejs 에 thead "작업" th 와 행마다 <td class="equipment-actions"> 를 상태 칼럼 뒤에 추가했다.
       status === 'available' 인 행에만 <details class="rent-toggle"><summary class="btn btn--primary">대여</summary>
