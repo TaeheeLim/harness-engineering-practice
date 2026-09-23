@@ -10,9 +10,23 @@
     <h1>사내 장비 대여 관리</h1>
   </header>
   <main>
-    <%# 장비 목록 영역. 행 렌더링(이름/종류/상태)은 F-003~F-006 에서 채운다. %>
+    <%# 장비 목록 영역. 행마다 한 장비. 종류/상태 칼럼은 F-005/F-006 에서 td 를 추가해 확장한다. %>
     <section id="equipment-list" aria-labelledby="equipment-list-title">
       <h2 id="equipment-list-title">장비 목록</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">장비명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% equipment.forEach(function (item) { %>
+          <tr class="equipment-row" data-equipment-id="<%= item.id %>">
+            <td class="equipment-name"><%= item.name %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
     </section>
   </main>
 </body>

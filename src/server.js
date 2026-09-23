@@ -2,10 +2,17 @@
 // EJS 뷰 엔진 설정, 헬스체크, 장비 목록 페이지(/)를 제공한다.
 const path = require('path');
 const express = require('express');
-const { DB_PATH } = require('./db');
+const { getDb, DB_PATH } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// 프로세스당 하나의 DB 연결을 재사용한다 (better-sqlite3 는 동기 API)
+let db;
+function conn() {
+  if (!db) db = getDb();
+  return db;
+}
 
 // 미들웨어
 app.use(express.urlencoded({ extended: true }));
@@ -23,7 +30,10 @@ app.get('/health', (req, res) => {
 
 // 루트 — 장비 목록 페이지 (EJS SSR)
 app.get('/', (req, res) => {
-  res.render('index', { title: 'NKIA 장비 대여' });
+  const equipment = conn()
+    .prepare('SELECT id, name, type, status FROM equipment ORDER BY id')
+    .all();
+  res.render('index', { title: 'NKIA 장비 대여', equipment });
 });
 
 if (require.main === module) {
