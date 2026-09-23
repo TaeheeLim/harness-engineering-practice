@@ -11,6 +11,13 @@
 - 브라우저 네이티브 alert()/confirm() 금지. 인페이지 모달 사용.
 - 파일 인코딩은 UTF-8(BOM 없음), 줄바꿈은 LF.
 
+## UI 규약
+- 화면을 바꾸는 작업 전에 `docs/UI_GUIDE.md` 를 읽는다. 색·간격은 거기 정의된 토큰만 쓴다.
+- 스타일은 `public/app.css` 한 파일에만. 인라인 style, CSS 프레임워크/CDN 금지.
+- 상태는 `.badge--available / --rented / --overdue` 배지로 표시하고, 색만으로 구분하지 않는다.
+- UI_GUIDE §6 의 테스트 의존 선택자(id/class/aria/텍스트)는 스타일 작업 중에도 바꾸지 않는다.
+- UI 변경 후 커밋 전에 UI_GUIDE §7 대로 1280px/375px 스크린샷을 찍어 직접 열어보고 확인한다.
+
 ## 검증
 - e2e 테스트는 `e2e/<feature-id>.spec.js` 에 작성한다.
 - URL 은 상대경로로 쓴다 (baseURL 은 playwright.config 에 설정됨).
