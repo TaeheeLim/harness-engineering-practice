@@ -109,6 +109,7 @@ U-* 항목을 포함해 화면을 건드리는 모든 작업은 이 문서를 �
 | `thead th` `작업`, 대여가능 행의 `td.equipment-actions details.rent-toggle > summary` `대여`, 그 안의 `form.rent-form[method=post][action="/equipment/<id>/rent"]` + `button[type=submit]` `대여` (대여가능이 아닌 행엔 없음) | F-007 |
 | 대여중 행의 `td.equipment-actions form.return-form[method=post][action="/equipment/<id>/return"]` + `button[type=submit].btn--secondary` `반납` (대여중이 아닌 행엔 없음, 대여중 행엔 `.rent-toggle` 없음) | F-008 |
 | `form.rent-form` 안 제출 버튼 앞의 `label[for="renter-<id>"]` `대여자명` + `input#renter-<id>[type=text][name=renter_name][required]` | F-009 |
+| `form.rent-form` 안 대여자명 입력 뒤·제출 버튼 앞의 `label[for="due-<id>"]` `반납예정일` + `input#due-<id>[type=date][name=due_date][required]` | F-010 |
 
 ## 7. 셀프 리뷰 절차 (UI 변경 시 필수)
 테스트 통과만으로는 "보기 좋은지"를 알 수 없다. 커밋 전에 스크린샷을 찍어 **직접 이미지를 열어 확인**한다.

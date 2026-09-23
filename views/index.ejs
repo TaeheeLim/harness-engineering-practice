@@ -37,6 +37,8 @@
                   <%# 입력 id 는 행마다 유일해야 label for 연결이 맞으므로 장비 id 를 붙인다. %>
                   <label for="renter-<%= item.id %>">대여자명</label>
                   <input type="text" id="renter-<%= item.id %>" name="renter_name" required>
+                  <label for="due-<%= item.id %>">반납예정일</label>
+                  <input type="date" id="due-<%= item.id %>" name="due_date" required>
                   <button type="submit" class="btn btn--primary">대여</button>
                 </form>
               </details>
