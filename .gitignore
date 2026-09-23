@@ -19,3 +19,8 @@ Thumbs.db
 
 # Env
 .env
+data/*.db
+data/server.pid
+data/server.log
+test-results/
+playwright-report/

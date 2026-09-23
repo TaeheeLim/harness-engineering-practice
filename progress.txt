@@ -1,16 +1,17 @@
 # progress.txt — 작업 진행 로그
 #
 # 기능 구현 세션마다 아래 형식으로 한 줄씩 추가한다.
-# 형식:
-#   [YYYY-MM-DD HH:MM] <feature_id> <상태: START|DONE|BLOCKED> - <요약>
+# 형식 (세션마다 맨 위에 추가):
 #
-# 예시:
-#   [2026-09-22 17:00] F-003 DONE - 장비 목록 시드 데이터 렌더링, 검증 절차 통과
+#   [YYYY-MM-DD HH:MM] <commit-hash> | <feature_id> <DONE|BLOCKED>
+#     (1) 했다: 무엇을 어떤 방식으로 구현했는지 (설계 판단 포함)
+#     (2) 주의: 막혔던 지점이나 다음 사람이 주의할 점
+#     (3) 다음: 다음 세션에 무엇을 하면 좋을지와 그 이유
 #
 # 규칙:
-#   - feature_list.json 의 항목을 완료하면 해당 항목 passes 를 true 로 바꾸고 여기 DONE 기록.
-#   - 한 세션당 하나의 feature_id 를 끝내는 것을 원칙으로 한다.
-#   - BLOCKED 시 사유를 요약에 남긴다.
+#   - 최신 항목이 위로 온다.
+#   - 완료 시 feature_list.json 의 해당 passes 를 true 로 바꾼다.
+#   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
 [2026-09-23 11:05] F-001 DONE - 서버 기동 및 /health 헬스체크 정상 응답 확인, feature_list.json passes:true 처리
