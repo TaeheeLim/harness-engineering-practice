@@ -104,6 +104,7 @@ U-* 항목을 포함해 화면을 건드리는 모든 작업은 이 문서를 �
 | `#equipment-list`, `aria-labelledby="equipment-list-title"`, h2 `장비 목록` | F-002, F-003 |
 | `tbody tr.equipment-row[data-equipment-id]` | F-003, F-004 |
 | `thead th` `장비명`, `td.equipment-name` | F-004 |
+| `thead th` `종류`, `td.equipment-type` | F-005 |
 
 ## 7. 셀프 리뷰 절차 (UI 변경 시 필수)
 테스트 통과만으로는 "보기 좋은지"를 알 수 없다. 커밋 전에 스크린샷을 찍어 **직접 이미지를 열어 확인**한다.
