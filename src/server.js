@@ -1,6 +1,5 @@
 // Express 서버 부트스트랩 (환경 스캐폴드)
-// EJS 뷰 엔진 설정 + 헬스체크만 제공한다.
-// 장비 목록/대여/반납 등 애플리케이션 기능 라우트는 여기 없다 (feature_list.json 참고).
+// EJS 뷰 엔진 설정, 헬스체크, 장비 목록 페이지(/)를 제공한다.
 const path = require('path');
 const express = require('express');
 const { DB_PATH } = require('./db');
@@ -22,18 +21,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', db: DB_PATH, ts: new Date().toISOString() });
 });
 
-// 루트 — 스캐폴드 플레이스홀더. 실제 장비 목록 페이지는 기능 세션에서 구현한다.
+// 루트 — 장비 목록 페이지 (EJS SSR)
 app.get('/', (req, res) => {
-  res
-    .status(200)
-    .type('html')
-    .send(
-      '<!doctype html><meta charset="utf-8">' +
-        '<title>NKIA 장비 대여</title>' +
-        '<h1>사내 장비 대여 관리 — 환경 스캐폴드</h1>' +
-        '<p>환경 구축이 완료되었습니다. 애플리케이션 기능은 아직 구현되지 않았습니다.</p>' +
-        '<p>헬스체크: <a href="/health">/health</a></p>'
-    );
+  res.render('index', { title: 'NKIA 장비 대여' });
 });
 
 if (require.main === module) {
