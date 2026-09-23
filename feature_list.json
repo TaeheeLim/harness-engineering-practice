@@ -8,7 +8,7 @@
       "브라우저에서 http://localhost:3000/health 접속",
       "응답 JSON 에 status: ok 가 포함되는지 확인"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F-002",

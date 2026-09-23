@@ -3,6 +3,15 @@
 # 의존성 설치 -> DB 초기화/시드 -> 개발 서버 기동 -> 헬스체크 -> 접속 URL 출력 -> exit 0
 set -euo pipefail
 
+# --- 환경 가드 ---
+if [ "$(node -p 'process.platform' 2>/dev/null)" != "linux" ]; then
+  echo "ERROR: Windows용 Node가 잡혔습니다. WSL 안에 Node를 설치하세요." >&2
+  echo "  현재 node: $(which node 2>/dev/null || echo '없음')" >&2
+  exit 1
+fi
+# -----------------
+
+
 cd "$(dirname "$0")"
 
 PORT="${PORT:-3000}"
