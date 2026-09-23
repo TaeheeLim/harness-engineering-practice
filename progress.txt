@@ -14,6 +14,32 @@
 #   - 한 세션당 feature_id 하나를 원칙으로 한다.
 #
 # ---- 로그 (아래에 추가) ----
+[2026-09-23 13:03] 55a8e65 | F-003 DONE
+  (1) 했다: src/server.js 의 GET / 에서 SELECT id, name, type, status FROM equipment ORDER BY id 를
+      동기 .all() 로 조회해 index 템플릿에 equipment 로 넘긴다. getDb() 는 호출마다 새 연결을 여는
+      헬퍼라서 server.js 안에 conn() 으로 지연 생성한 연결 1개를 프로세스 동안 재사용하게 했다.
+      views/index.ejs 는 #equipment-list 안에 <table><thead><tbody> 를 두고 장비마다
+      <tr class="equipment-row" data-equipment-id="..."> 한 행을 렌더링한다.
+      설계 판단: 시드 장비가 "나타나는지" 확인하려면 행을 식별할 내용이 필요해서 장비명 칼럼
+      (td.equipment-name) 하나만 넣었다. 종류/상태 칼럼은 넣지 않았다(F-005/F-006 몫). 쿼리에는
+      type/status 를 이미 포함했으므로 다음 기능들은 템플릿에 th/td 만 추가하면 된다.
+      빈 목록 안내(U-008)와 스타일(U-002)은 손대지 않았다.
+      검증: e2e/F-003.spec.js 는 steps 3개를 그대로 옮겼다 — (a) / 접속 후 #equipment-list 표시,
+      (b) data/app.db 를 better-sqlite3 readonly 로 실제 쿼리해 노트북/모니터/주변기기 종류가 모두
+      있는지, 장비 id 마다 행이 보이고 장비명이 들어있는지, (c) 행 수 == DB COUNT(*) (현재 6, 시드 개수
+      이상인지도 확인). 전체 npx playwright test 3/3 통과(smoke, F-002 포함). 커밋 전 DB 를 따로
+      쿼리해 equipment COUNT(*) = 6 도 확인했다.
+  (2) 주의: F-003 테스트는 기대값을 DB 에서 가져오므로 대여 테스트가 추가돼도 깨지지 않지만, DB_PATH
+      환경변수를 서버와 테스트에 다르게 주면 불일치한다(둘 다 기본값 data/app.db 사용).
+      서버는 여전히 핫리로드가 없다 — 코드 수정 후 ./init.sh 재실행 필수.
+      행 셀렉터 tr.equipment-row[data-equipment-id] 와 td.equipment-name 은 F-003 테스트가 의존하니
+      이름을 바꾸지 말 것. 칼럼은 추가만 하면 호환된다.
+      장비명은 <%= %> 로 이스케이프 출력 중이다(R-008 대비 <%- %> 로 바꾸지 말 것).
+  (3) 다음: F-004(각 행에 장비명 표시). 이미 td.equipment-name 이 렌더링되므로 구현보다 검증 위주의
+      세션이 될 것이다 — 모든 행에서 장비명 셀이 비어있지 않고 DB name 과 일치하는지 테스트한다.
+      이어 F-005(종류 칼럼), F-006(상태 라벨: status 'available'->대여가능, 'rented'->대여중 매핑)을
+      같은 행에 td 를 추가하는 방식으로 진행하면 된다.
+
 [2026-09-23 12:57] 2fb3400 | F-002 DONE
   (1) 했다: views/index.ejs 를 새로 만들고 src/server.js 의 GET / 를 인라인 플레이스홀더 HTML 에서
       res.render('index', { title }) 로 바꿨다. 템플릿에는 h1("사내 장비 대여 관리")과 장비 목록 영역
